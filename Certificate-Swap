@@ -1,0 +1,47 @@
+
+➜  Original apktool d app.apk 
+
+#/Original/app/assets/certificate (check certificates)
+# remove the original certificate company.cert -> with burp certificate (in der format and rename burp certificate to company.cert)
+
+#Use MD5 hash to verify correct files are overwritten.
+
+➜  Original apktool b ./app -o new.apk (build the APK with replaced cert)
+
+#While building APK again you might see (brut.androlib.AndrolibException: brut.common.BrutException: could not exec)
+
+#Then use aapt2 to build the app
+
+➜  Original apktool b --use-aapt2 -o new.apk ./app
+
+#Now we need to sign new.apk to do that we need to make a keystore
+
+➜  Original keytool -genkey -keyalg RSA -alias alias -keystore name.jks -keysize 2048 -storepass <PASSWORD> -validity 365
+What is your first and last name?
+  [Unknown]:  
+What is the name of your organizational unit?
+  [Unknown]:  
+What is the name of your organization?
+  [Unknown]:  
+What is the name of your City or Locality?
+  [Unknown]:  
+What is the name of your State or Province?
+  [Unknown]:  
+What is the two-letter country code for this unit?
+  [Unknown]:  
+Is CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown correct?
+  [no]:  Y
+
+Enter key password for <alias>
+	(RETURN if same as keystore password):  
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using "keytool -importkeystore -srckeystore name.jks -destkeystore name.jks -deststoretype pkcs12".
+
+#use keystore to sign 
+
+➜  Original jarsigner  -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore name.jks new.apk alias
+Enter Passphrase for keystore: 
+
+Successfully created a signed APK (new.apk)
+
